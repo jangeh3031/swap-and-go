@@ -25,4 +25,11 @@ public class Address {
         this.street = street;
         this.zipcode = zipcode;
     }
+
+    //for test
+    public Address(String country, String city, String street){
+        this.country = country;
+        this.city = city;
+        this.street = street;
+    }
 }
