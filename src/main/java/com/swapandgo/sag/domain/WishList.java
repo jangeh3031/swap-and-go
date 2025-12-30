@@ -5,13 +5,14 @@ import com.swapandgo.sag.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 public class WishList {
     @Id @GeneratedValue
     @Column(name = "wishlist_id")
     private Long id;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -21,10 +22,13 @@ public class WishList {
     @JoinColumn(name = "post_id")
     private Item item;
 
+    private LocalDateTime createdAt;
+
     public static WishList create(User user, Item item){
         WishList wishList = new WishList();
         wishList.user = user;
         wishList.item = item;
+        wishList.createdAt = LocalDateTime.now();
         return wishList;
     }
 }

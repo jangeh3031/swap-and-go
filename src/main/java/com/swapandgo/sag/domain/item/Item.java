@@ -41,18 +41,18 @@ public class Item {
     private TradeType tradeType;
 
     @Enumerated(EnumType.STRING)
-    private itemStatus status;
+    private ItemStatus status;
 
     @Enumerated(EnumType.STRING)
-    private Category categoty;
+    private Category category;
 
     private String location;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
     private List<Image> images = new ArrayList<>();
 
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     //생성 메서드
     public static Item create(
@@ -68,15 +68,19 @@ public class Item {
         item.deposit = deposit;
         item.type = type;
         item.tradeType = tradeType;
-        item.categoty = category;
-        item.status = itemStatus.ACTIVE;
+        item.category = category;
+        item.status = ItemStatus.ACTIVE;
         item.location = location;
-        item.created_at = LocalDateTime.now();
-        item.updated_at = LocalDateTime.now();
+        item.createdAt = LocalDateTime.now();
+        item.updatedAt = LocalDateTime.now();
 
-        if(imageUrls != null){
-            for (String url : imageUrls){
-                Image image = Image.create(url);
+        if(imageUrls != null && !imageUrls.isEmpty()){
+            for (int i = 0; i < imageUrls.size(); i++){
+                Image image = Image.create(imageUrls.get(i));
+                if(i == 0){
+                    image.markAsMain();
+                }
+
                 item.addImage(image);
             }
         }
@@ -112,16 +116,16 @@ public class Item {
 
     //거래 완료 상태로 바꾸기 (중고 거래 요청 수락 했을 때, 대여 수락 했을 때)
     public void completed(){
-        if(this.status == itemStatus.COMPLETED)
+        if(this.status == ItemStatus.COMPLETED)
             throw new IllegalStateException("이미 거래 완료된 게시글입니다.");
-        this.status = itemStatus.COMPLETED;
+        this.status = ItemStatus.COMPLETED;
     }
 
     //거래 상태 활성화로 바꾸기 (대여 기간 끝났을때?)
     public void activate(){
-        if(this.status == itemStatus.ACTIVE)
+        if(this.status == ItemStatus.ACTIVE)
             throw new IllegalStateException("이미 활성화된 게시글입니다.");
-        this.status = itemStatus.ACTIVE;
+        this.status = ItemStatus.ACTIVE;
     }
 
     //게시글 수정
@@ -132,20 +136,28 @@ public class Item {
         this.content = content;
         this.price = price;
         this.deposit = deposit;
-        this.categoty = category;
+        this.category = category;
         this.tradeType = tradeType;
-        this.updated_at = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
 
         //validate();
     }
 
     //대표 이미지 조회
-    public String getMainImageUrl(){
+    public String getThumbnailUrl(){
+        // 1. isMain이 true인 이미지 찾기
         for (Image image : images){
             if(image.isMain()){
                 return image.getUrl();
             }
         }
+
+        // 2. isMain이 없으면 첫 번째 이미지 반환
+        if(! images.isEmpty()){
+            return images.get(0).getUrl();
+        }
+
+        // 3. 이미지가 아예 없으면 null
         return null;
     }
 

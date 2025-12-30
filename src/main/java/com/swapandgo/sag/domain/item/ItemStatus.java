@@ -1,5 +1,5 @@
 package com.swapandgo.sag.domain.item;
 
-public enum itemStatus {
+public enum ItemStatus {
     ACTIVE, COMPLETED, RENTED
 }
