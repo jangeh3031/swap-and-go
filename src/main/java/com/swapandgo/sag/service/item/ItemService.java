@@ -32,7 +32,7 @@ public class ItemService {
                 request.getContent(),
                 request.getPrice(),
                 null,
-                ItemType.USED,
+                ItemType.RESALE,
                 request.getTradeType(),
                 request.getCategory(),
                 request.getLocation(),

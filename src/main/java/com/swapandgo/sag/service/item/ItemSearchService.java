@@ -29,7 +29,7 @@ public class ItemSearchService {
     //repository에서 조건에 맞는 아이템들을 가져오고, user확인을 통해 내가 like를 눌렀는지 확 후
     //searchResponse 형태로 반환
     public SearchResponse search(SearchRequest request, Long userId){
-        //최신순으로 limit 만큼 (20개) 가져오기
+        //최신순으로 limit 만큼 (12개) 가져오기
         List<Item> items = itemQueryRepository.usedItemSearch(request);
 
         boolean hasNext = items.size() > request.getLimit();
@@ -79,7 +79,7 @@ public class ItemSearchService {
         boolean itemStatus;
         itemStatus = item.getStatus() == ItemStatus.ACTIVE;
         return ItemSearchDto.builder()
-                .id(item.getId())
+                .itemId(item.getId())
                 .title(item.getTitle())
                 .price(item.getPrice())
                 .region(item.getLocation())

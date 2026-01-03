@@ -173,7 +173,7 @@ public class Item {
             throw new IllegalStateException("본인 글에는 요청을 보낼 수 없습니다.");
         }
 
-        if (this.type == ItemType.USED){
+        if (this.type == ItemType.RESALE){
             startAt = null;
             endAt = null;
         } else if (this.type == ItemType.RENTAL) {

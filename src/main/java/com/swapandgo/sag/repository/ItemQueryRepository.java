@@ -59,7 +59,7 @@ public class ItemQueryRepository {
         }
 
         // 8. 중고거래 엔드포인트임으로 중고물품만
-        builder.and(item.type.eq(ItemType.USED));
+        builder.and(item.type.eq(ItemType.RESALE));
 
         return queryFactory
                 .selectFrom(item)

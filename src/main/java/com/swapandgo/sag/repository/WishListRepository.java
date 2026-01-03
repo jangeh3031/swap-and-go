@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface WishListRepository extends JpaRepository<WishList, Long> {
@@ -16,4 +17,6 @@ public interface WishListRepository extends JpaRepository<WishList, Long> {
             @Param("userId") Long userId,
             @Param("itemIds") List<Long> itemIds
             );
+
+    Optional<WishList> findWishListByItemIdAndUserId(Long itemId, Long userId);
 }

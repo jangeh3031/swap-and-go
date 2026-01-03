@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class ItemSearchDto {
-    private Long id;
+    private Long itemId;
     private String title;
     private BigDecimal price;
     private BigDecimal deposit;

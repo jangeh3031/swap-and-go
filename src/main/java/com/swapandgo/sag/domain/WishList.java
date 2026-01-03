@@ -19,7 +19,7 @@ public class WishList {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "item_id")
     private Item item;
 
     private LocalDateTime createdAt;

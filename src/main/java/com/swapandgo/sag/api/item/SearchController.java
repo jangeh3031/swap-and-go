@@ -48,7 +48,7 @@ public class SearchController {
                 .minPrice(parsedPriceRange.getMin())
                 .maxPrice(parsedPriceRange.getMax())
                 .cursor(cursor)
-                .limit(20)
+                .limit(12)
                 .build();
 
         //로그인 안된 유저도 검색할 수 있음

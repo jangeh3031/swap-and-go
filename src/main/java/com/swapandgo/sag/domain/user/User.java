@@ -72,29 +72,10 @@ public class User {
         return true;
     }
 
-    //찜 추가 / 삭제 로직
-    public boolean toggleWish(Item item){
-        WishList existing = findWishFor(item);
-
-        //이미 찜이 있으면 해제
-        if(existing != null){
-            this.wishLists.remove(existing);
-            //db 삭제는 sevice or repo 계층에서
-            return false;
-        }
-        //없으면 생성
+    //찜 추가
+    public void addWish(Item item){
         WishList wishList = WishList.create(this, item);
         this.wishLists.add(wishList);
-        return true;
-    }
-
-    private WishList findWishFor(Item item){
-        for (WishList w: wishLists){
-            if(w.getItem().equals(item)){
-                return w;
-            }
-        }
-        return null;
     }
 
     //요청을 보낸 user의 클래스에서 확정 메서드를 호출하는 구조
