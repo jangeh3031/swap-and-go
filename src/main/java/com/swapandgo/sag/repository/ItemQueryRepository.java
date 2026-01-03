@@ -17,7 +17,7 @@ import java.util.List;
 public class ItemQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    public List<Item> usedItemSearch(SearchRequest request){
+    public List<Item> usedItemSearch(SearchRequest request, ItemType itemType){
         QItem item = QItem.item;
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -58,8 +58,8 @@ public class ItemQueryRepository {
             builder.and(item.id.lt(request.getCursor()));
         }
 
-        // 8. 중고거래 엔드포인트임으로 중고물품만
-        builder.and(item.type.eq(ItemType.RESALE));
+        // 8. 아이템 타입
+        builder.and(item.type.eq(itemType));
 
         return queryFactory
                 .selectFrom(item)

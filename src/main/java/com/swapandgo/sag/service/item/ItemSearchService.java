@@ -2,6 +2,7 @@ package com.swapandgo.sag.service.item;
 
 import com.swapandgo.sag.domain.item.Item;
 import com.swapandgo.sag.domain.item.ItemStatus;
+import com.swapandgo.sag.domain.item.ItemType;
 import com.swapandgo.sag.dto.search.ItemSearchDto;
 import com.swapandgo.sag.dto.search.SearchRequest;
 import com.swapandgo.sag.dto.search.SearchResponse;
@@ -28,9 +29,10 @@ public class ItemSearchService {
 
     //repository에서 조건에 맞는 아이템들을 가져오고, user확인을 통해 내가 like를 눌렀는지 확 후
     //searchResponse 형태로 반환
-    public SearchResponse search(SearchRequest request, Long userId){
+    public SearchResponse search(SearchRequest request, Long userId, ItemType itemType){
         //최신순으로 limit 만큼 (12개) 가져오기
-        List<Item> items = itemQueryRepository.usedItemSearch(request);
+
+        List<Item> items = itemQueryRepository.usedItemSearch(request, itemType);
 
         boolean hasNext = items.size() > request.getLimit();
 
@@ -68,10 +70,6 @@ public class ItemSearchService {
                 .hasNext(hasNext)
                 .items(itemDtos)
                 .build();
-
-
-
-
 
     }
 
