@@ -1,25 +1,29 @@
-package com.swapandgo.sag.dto.search;
+package com.swapandgo.sag.dto.search.detail;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.swapandgo.sag.domain.item.Category;
-import com.swapandgo.sag.domain.item.TradeType;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
-public class ItemSearchDto {
+public class ResaleDetailResponse {
     private Long itemId;
     private String title;
+    private String content;
     private BigDecimal price;
-    private BigDecimal deposit;
     private String region;
-    private TradeType dealType;
     private Category category;
-    private Boolean isAvailable;
+    private Boolean isMine;
     private Boolean isLiked;
-    private String thumbnailUrl;
+    private Boolean isAvailable;
     private LocalDateTime createdAt;
+    private List<String> images;
+    private SellerDto seller;
+    private List<RecentPostsBySeller> recentPostsBySeller;
+
 }

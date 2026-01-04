@@ -10,6 +10,7 @@ import com.swapandgo.sag.dto.search.SearchRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -17,6 +18,7 @@ import java.util.List;
 public class ItemQueryRepository {
     private final JPAQueryFactory queryFactory;
 
+    // 기본 Search page
     public List<Item> usedItemSearch(SearchRequest request, ItemType itemType){
         QItem item = QItem.item;
         BooleanBuilder builder = new BooleanBuilder();
@@ -67,6 +69,32 @@ public class ItemQueryRepository {
                 .orderBy(item.id.desc()) // 최신순
                 .limit(request.getLimit()+1) // hasNext 확인용으로 + 1
                 .fetch();
+
+    }
+
+    //사용자의 최근 게시물들, 중고와 대여 최대 9개씩
+    public List<Item> findRecentPost(int resaleLimit, int rentalLimit, Long itemId){
+        QItem item = QItem.item;
+
+        List<Item> resaleItems = queryFactory.selectFrom(item)
+                .where(item.type.eq(ItemType.RESALE),
+                        item.id.ne(itemId))
+                .orderBy(item.createdAt.desc())
+                .limit(resaleLimit)
+                .fetch();
+
+        List<Item> rentalItems = queryFactory.selectFrom(item)
+                .where(item.type.eq(ItemType.RENTAL),
+                        item.id.ne(itemId))
+                .orderBy(item.createdAt.desc())
+                .limit(rentalLimit)
+                .fetch();
+
+        List<Item> result = new ArrayList<>();
+        result.addAll(resaleItems);
+        result.addAll(rentalItems);
+
+        return result;
 
     }
 

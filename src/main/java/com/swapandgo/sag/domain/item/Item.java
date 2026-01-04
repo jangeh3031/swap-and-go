@@ -74,6 +74,7 @@ public class Item {
         item.createdAt = LocalDateTime.now();
         item.updatedAt = LocalDateTime.now();
 
+        //첫번째 이미지를 썸네일로 설정
         if(imageUrls != null && !imageUrls.isEmpty()){
             for (int i = 0; i < imageUrls.size(); i++){
                 Image image = Image.create(imageUrls.get(i));

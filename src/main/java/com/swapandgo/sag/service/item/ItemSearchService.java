@@ -74,16 +74,17 @@ public class ItemSearchService {
     }
 
     private ItemSearchDto toDto(Item item, boolean isLiked){
-        boolean itemStatus;
-        itemStatus = item.getStatus() == ItemStatus.ACTIVE;
+        boolean isAvailable;
+        isAvailable = item.getStatus() == ItemStatus.ACTIVE;
         return ItemSearchDto.builder()
                 .itemId(item.getId())
                 .title(item.getTitle())
                 .price(item.getPrice())
+                .deposit(item.getDeposit())
                 .region(item.getLocation())
                 .category(item.getCategory())
                 .dealType(item.getTradeType())
-                .status(itemStatus)
+                .isAvailable(isAvailable)
                 .isLiked(isLiked)
                 .thumbnailUrl(item.getThumbnailUrl())
                 .createdAt(item.getCreatedAt())
