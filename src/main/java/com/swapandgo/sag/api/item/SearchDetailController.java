@@ -28,5 +28,15 @@ public class SearchDetailController {
         return ResponseEntity.ok(resaleDetailResponse);
     }
 
+    @GetMapping("rental/items/{itemId}")
+    public ResponseEntity<RentalDetailResponse> rentalItemDetail(
+            @PathVariable("itemId") Long itemId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        Long userId = userDetails != null ? userDetails.getUserId() : null;
+        RentalDetailResponse rentalDetailResponse = itemDetailService.rentalItemDetailPage(itemId, userId);
+        return ResponseEntity.ok(rentalDetailResponse);
+    }
+
 
 }

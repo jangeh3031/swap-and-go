@@ -42,3 +42,15 @@ jwt:
   secret: "your-super-secret-key-that-should-be-at-least-32-characters-long-for-hs256"
   access-token-expiration: 3600000
   refresh-token-expiration: 604800000
+
+cloud:
+  aws:
+    credentials:
+      access-key: AKIA4TXA53LEOP3TIRF3
+      secret-key: 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
+    region:
+      static: eu-north-1
+    s3:
+      bucket: swapandgo-items
+    stack:
+      auto:  false

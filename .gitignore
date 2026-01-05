@@ -33,6 +33,10 @@ build/
 
 .env
 
+# AWS
+.aws/
+*.pem
+
 ### QueryDSL ###
 /src/main/generated/
 /build/generated/

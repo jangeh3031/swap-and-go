@@ -4,20 +4,19 @@ import com.swapandgo.sag.domain.Image;
 import com.swapandgo.sag.domain.item.Item;
 import com.swapandgo.sag.domain.item.ItemStatus;
 import com.swapandgo.sag.domain.item.ItemType;
+import com.swapandgo.sag.domain.transaction.Transaction;
 import com.swapandgo.sag.domain.user.User;
-import com.swapandgo.sag.dto.search.detail.ResaleDetailResponse;
-import com.swapandgo.sag.dto.search.detail.RecentPostsBySeller;
-import com.swapandgo.sag.dto.search.detail.SellerDto;
-import com.swapandgo.sag.repository.ItemQueryRepository;
-import com.swapandgo.sag.repository.ItemRepository;
-import com.swapandgo.sag.repository.UserRepository;
-import com.swapandgo.sag.repository.WishListRepository;
+import com.swapandgo.sag.dto.search.detail.*;
+import com.swapandgo.sag.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -29,6 +28,7 @@ public class ItemDetailService {
     private final ItemQueryRepository itemQueryRepository;
     private final UserRepository userRepository;
     private final WishListRepository wishListRepository;
+    private final TransactionRepository transactionRepository;
     public ResaleDetailResponse resaleItemDetailPage(Long itemId, Long userId){
         //item정보들
         //itemId, title, content, price, region, category, createdAt
@@ -99,6 +99,86 @@ public class ItemDetailService {
                 .seller(sellerDto)
                 .recentPostsBySeller(recentItemDtos)
                 .build();
+    }
+
+    public RentalDetailResponse rentalItemDetailPage(Long itemId, Long userId){
+        //item정보들
+        Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new IllegalArgumentException("해당 id의 item이 존재하지 않습니다."));
+        if (item.getType() == ItemType.RESALE)
+            throw new IllegalArgumentException("해당 id의 item은 중고 상품입니다.");
+
+        //isAvailable
+        boolean isAvailable = item.getStatus() != ItemStatus.COMPLETED;
+
+        boolean isMine = false;
+        boolean isLiked = false;
+        if (userId != null){
+            isMine = userId.equals(item.getUser().getId());
+            isLiked = wishListRepository.existsByItemIdAndUserId(itemId, userId);
+        }
+
+        List<String> images = new ArrayList<>();
+        List<Image> imageList = item.getImages();
+        for (Image image : imageList){
+            images.add(image.getUrl());
+        }
+
+        //rentalInfo
+        Optional<Transaction> currentRental = transactionRepository.findCurrentRentalByItemId(itemId, LocalDateTime.now());
+        RentalInfo rentalInfo;
+        if (currentRental.isPresent()){
+            Transaction transaction = currentRental.get();
+            rentalInfo = new RentalInfo(true, transaction.getStartAt(), transaction.getEndAt());
+        }else {
+            rentalInfo = new RentalInfo(false, null, null);
+        }
+
+
+        User user = userRepository.findById(item.getUser().getId()).orElseThrow(
+                ()-> new IllegalArgumentException("user를 찾을 수 없습니다.")
+        );
+        SellerDto sellerDto = new SellerDto(user.getId(), user.getUsername());
+
+
+
+        //recentPostBySeller
+        List<Item> recentPosts = itemQueryRepository.findRecentPost(9, 9, itemId);
+        //isLiked
+        List<Long> itemIds = new ArrayList<>();
+        for (Item getItem: recentPosts){
+            Long id = getItem.getId();
+            itemIds.add(id);
+        }
+        Set<Long> likedItemIds = (userId != null)
+                ? wishListRepository.findLikedItemIdsByUserId(userId, itemIds) : Set.of();  // 비로그인 시 빈 Set
+        List<RecentPostsBySeller> recentItemDtos = new ArrayList<>();
+
+        for (Item recentPost : recentPosts){
+            boolean recentPostIsLiked = likedItemIds.contains(recentPost.getId());
+            RecentPostsBySeller dto = itemToDto(recentPost, recentPostIsLiked);
+            recentItemDtos.add(dto);
+        }
+
+        return RentalDetailResponse.builder()
+                .itemId(itemId)
+                .title(item.getTitle())
+                .content(item.getContent())
+                .deposit(item.getDeposit())
+                .price(item.getPrice())
+                .region(item.getLocation())
+                .category(item.getCategory())
+                .isMine(isMine)
+                .isLiked(isLiked)
+                .isAvailable(isAvailable)
+                .createdAt(item.getCreatedAt())
+                .images(images)
+                .rentalInfo(rentalInfo)
+                .seller(sellerDto)
+                .recentPostsBySeller(recentItemDtos)
+                .build();
+
+
     }
 
     private RecentPostsBySeller itemToDto(Item item, boolean isLiked){
