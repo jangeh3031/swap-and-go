@@ -5,6 +5,10 @@ spring:
     username: sa
     password:
 
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration
+
   mail:
     host: smtp.gmail.com
     port: 587
