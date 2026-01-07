@@ -117,9 +117,13 @@ public class Item {
 
     //거래 완료 상태로 바꾸기 (중고 거래 요청 수락 했을 때, 대여 수락 했을 때)
     public void completed(){
-        if(this.status == ItemStatus.COMPLETED)
-            throw new IllegalStateException("이미 거래 완료된 게시글입니다.");
-        this.status = ItemStatus.COMPLETED;
+        if(this.status == ItemStatus.COMPLETED || this.status == ItemStatus.RENTED)
+            throw new IllegalStateException("이미 완료된 게시글입니다.");
+        if (this.deposit == null){
+            this.status = ItemStatus.COMPLETED;
+        }else {
+            this.status = ItemStatus.RENTED;
+        }
     }
 
     //거래 상태 활성화로 바꾸기 (대여 기간 끝났을때?)

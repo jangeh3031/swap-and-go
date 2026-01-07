@@ -45,6 +45,8 @@ public class Transaction {
         transaction.type = type;
         transaction.startAt = startAt;
         transaction.endAt = endAt;
+        transaction.createdAt = LocalDateTime.now();
+        transaction.updatedAt = LocalDateTime.now();
 
         return transaction;
     }

@@ -109,7 +109,7 @@ public class ItemDetailService {
             throw new IllegalArgumentException("해당 id의 item은 중고 상품입니다.");
 
         //isAvailable
-        boolean isAvailable = item.getStatus() != ItemStatus.COMPLETED;
+        boolean isAvailable = item.getStatus() != ItemStatus.RENTED;
 
         boolean isMine = false;
         boolean isLiked = false;
