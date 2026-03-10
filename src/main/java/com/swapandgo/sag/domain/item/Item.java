@@ -189,6 +189,7 @@ public class Item {
                 throw new IllegalStateException("지원하지 않는 거래 타입입니다.");
         }
 
+
         Request request = Request.create(requester, this, startAt, endAt);
 
         // 양방향 연관관계 동기화
