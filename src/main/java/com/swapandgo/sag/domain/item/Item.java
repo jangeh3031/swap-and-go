@@ -182,13 +182,12 @@ public class Item {
             startAt = null;
             endAt = null;
         } else if (this.type == ItemType.RENTAL) {
-            if (startAt == null || endAt == null) {
+            if(startAt == null || endAt == null){
                 throw new IllegalArgumentException("대여 요청에는 대여 기간이 필요합니다.");
-            }
-        } else {
+            }else {
                 throw new IllegalStateException("지원하지 않는 거래 타입입니다.");
+            }
         }
-
 
         Request request = Request.create(requester, this, startAt, endAt);
 
