@@ -90,8 +90,16 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(){
-        //클라이언트 측에서 토큰 삭제
-        return ResponseEntity.ok("로그아웃 되었습니다.");
+        ResponseCookie deleteRefreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString())
+                .body("로그아웃 되었습니다.");
     }
 
 
