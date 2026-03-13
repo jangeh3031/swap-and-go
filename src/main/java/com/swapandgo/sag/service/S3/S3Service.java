@@ -28,7 +28,7 @@ public class S3Service {
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private final S3Client s3Client;
 
-    @Value("{cloud.aws.s3.bucket}")
+    @Value("${cloud.aws.s3.bucket}")
     private String bucket;
     @Value("${cloud.aws.region.static}")
     private String region;
@@ -72,7 +72,7 @@ public class S3Service {
             throw new RuntimeException("S3 업로드 중 오류가 발생했습니다.", e);
         }
 
-        return "https://" + bucket + ".s3." + region + "amazonaws.com/" + fileName;
+        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + fileName;
     }
 
     public void deleteImage(String imageUrl){
