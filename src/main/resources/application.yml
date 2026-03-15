@@ -21,10 +21,6 @@ spring:
           starttls:
             enable: true
 
-sendgrid:
-  api-key: ${SENDGRID_API_KEY:}
-  from-email: ${SENDGRID_FROM_EMAIL:}
-
   data:
     redis:
       url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379}
@@ -35,6 +31,7 @@ sendgrid:
     properties:
       hibernate:
         format_sql: true
+        use_sql_comments: true
 
   h2:
     console:
@@ -43,18 +40,15 @@ sendgrid:
       settings:
         web-allow-others: true
 
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: ${SENDGRID_FROM_EMAIL:}
+
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
     org.hibernate.orm.jdbc.extract: trace
-
-spring:
-  jpa:
-    properties:
-      hibernate:
-        format_sql: true
-        use_sql_comments: true
     org.springframework.security: debug
     com.swapandgo.sag.security: debug
 
