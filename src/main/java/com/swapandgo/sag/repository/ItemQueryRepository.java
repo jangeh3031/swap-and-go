@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.swapandgo.sag.domain.item.Item;
 import com.swapandgo.sag.domain.item.ItemStatus;
 import com.swapandgo.sag.domain.item.ItemType;
+import com.swapandgo.sag.domain.QImage;
 import com.swapandgo.sag.domain.item.QItem;
 import com.swapandgo.sag.dto.search.SearchRequest;
 import lombok.RequiredArgsConstructor;
@@ -75,8 +76,11 @@ public class ItemQueryRepository {
     //사용자의 최근 게시물들, 중고와 대여 최대 9개씩
     public List<Item> findRecentPost(int resaleLimit, int rentalLimit, Long itemId){
         QItem item = QItem.item;
+        QImage image = QImage.image;
 
         List<Item> resaleItems = queryFactory.selectFrom(item)
+                .distinct()
+                .leftJoin(item.images, image).fetchJoin()
                 .where(item.type.eq(ItemType.RESALE),
                         item.id.ne(itemId))
                 .orderBy(item.createdAt.desc())
@@ -84,6 +88,8 @@ public class ItemQueryRepository {
                 .fetch();
 
         List<Item> rentalItems = queryFactory.selectFrom(item)
+                .distinct()
+                .leftJoin(item.images, image).fetchJoin()
                 .where(item.type.eq(ItemType.RENTAL),
                         item.id.ne(itemId))
                 .orderBy(item.createdAt.desc())
