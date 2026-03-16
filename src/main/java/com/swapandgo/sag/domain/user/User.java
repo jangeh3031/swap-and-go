@@ -1,6 +1,6 @@
 package com.swapandgo.sag.domain.user;
 
-import com.swapandgo.sag.domain.tradeoffer.TradeOffer;
+import com.swapandgo.sag.domain.request.Request;
 import com.swapandgo.sag.domain.WishList;
 import com.swapandgo.sag.domain.item.Item;
 import com.swapandgo.sag.domain.transaction.Transaction;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(name = "users")
+@Table(name = "user")
 public class User {
     @Id @GeneratedValue
     @Column(name = "user_id")
@@ -35,7 +35,7 @@ public class User {
     private List<WishList> wishLists = new ArrayList<>();
 
     @OneToMany(mappedBy = "requester", cascade = CascadeType.ALL)
-    private List<TradeOffer> sentTradeOffers = new ArrayList<>();
+    private List<Request> sentRequests = new ArrayList<>();
 
     @OneToMany(mappedBy = "buyer")
     private List<Transaction> transactions = new ArrayList<>();
@@ -72,18 +72,37 @@ public class User {
         return true;
     }
 
-    //찜 추가
-    public void addWish(Item item){
+    //찜 추가 / 삭제 로직
+    public boolean toggleWish(Item item){
+        WishList existing = findWishFor(item);
+
+        //이미 찜이 있으면 해제
+        if(existing != null){
+            this.wishLists.remove(existing);
+            //db 삭제는 sevice or repo 계층에서
+            return false;
+        }
+        //없으면 생성
         WishList wishList = WishList.create(this, item);
         this.wishLists.add(wishList);
+        return true;
+    }
+
+    private WishList findWishFor(Item item){
+        for (WishList w: wishLists){
+            if(w.getItem().equals(item)){
+                return w;
+            }
+        }
+        return null;
     }
 
     //요청을 보낸 user의 클래스에서 확정 메서드를 호출하는 구조
-    public Transaction confirmSentTransaction(TradeOffer tradeOffer){
+    public Transaction confirmSentTransaction(Request request){
 
         //게시물이 중고거래 일때는 기간 null
-        Transaction transaction = Transaction.create(tradeOffer.getRequester(), tradeOffer.getItem(), tradeOffer.getItem().getType(),
-                tradeOffer.getStartAt(), tradeOffer.getEndAt());
+        Transaction transaction = Transaction.create(request.getRequester(), request.getItem(), request.getItem().getType(),
+                request.getStartAt(), request.getEndAt());
 
         transactions.add(transaction);
 //        request.getItem().getUser().transactions.add(transaction);

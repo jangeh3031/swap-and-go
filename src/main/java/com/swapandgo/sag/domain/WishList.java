@@ -5,8 +5,6 @@ import com.swapandgo.sag.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 public class WishList {
@@ -14,21 +12,19 @@ public class WishList {
     @Column(name = "wishlist_id")
     private Long id;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "post_id")
     private Item item;
-
-    private LocalDateTime createdAt;
 
     public static WishList create(User user, Item item){
         WishList wishList = new WishList();
         wishList.user = user;
         wishList.item = item;
-        wishList.createdAt = LocalDateTime.now();
         return wishList;
     }
 }
