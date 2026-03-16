@@ -1,0 +1,68 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/sag;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration
+
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.sendgrid.net}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:apikey}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  data:
+    redis:
+      url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379}
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: ${SENDGRID_FROM_EMAIL:}
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.security: debug
+    com.swapandgo.sag.security: debug
+
+jwt:
+  secret: "your-super-secret-key-that-should-be-at-least-32-characters-long-for-hs256"
+  access-token-expiration: 3600000
+  refresh-token-expiration: 604800000
+
+cloud:
+  aws:
+    credentials:
+      access-key: AKIA4TXA53LEOP3TIRF3
+      secret-key: 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
+    region:
+      static: eu-north-1
+    s3:
+      bucket: swapandgo-items
+    stack:
+      auto:  false

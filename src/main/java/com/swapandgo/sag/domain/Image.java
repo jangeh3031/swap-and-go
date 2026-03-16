@@ -24,7 +24,11 @@ public class Image {
     private boolean isMain = false;
 
     //생성 메서드
-
+    public static Image create(String url){
+        Image image = new Image();
+        image.url = url;
+        return image;
+    }
 
     //비즈니스 로직
 
