@@ -70,4 +70,21 @@ public class TradeOfferTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("진행 중인 요청");
     }
+
+    @Test
+    void create_allowsSameStartAndEnd() {
+        User requester = User.createUser("r", "r@test.com", "pw", null);
+        Item item = Item.create(
+                User.createUser("o", "o@test.com", "pw", null),
+                "t", "c", new BigDecimal("10.00"), new BigDecimal("5.00"),
+                ItemType.RENTAL, TradeType.SELL, Category.스포츠, "Seoul", List.of()
+        );
+
+        LocalDateTime at = LocalDateTime.now();
+        TradeOffer offer = TradeOffer.create(requester, item, at, at);
+
+        assertThat(offer.getStartAt()).isEqualTo(at);
+        assertThat(offer.getEndAt()).isEqualTo(at);
+        assertThat(offer.getStatus()).isEqualTo(TradeOfferStatus.PENDING);
+    }
 }

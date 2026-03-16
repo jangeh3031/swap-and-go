@@ -40,4 +40,13 @@ public class UserTest {
         assertThat(user.getWishLists()).hasSize(1);
         assertThat(user.getWishLists().get(0).getItem()).isEqualTo(item);
     }
+
+    @Test
+    void updateProfile_nullAddress_overwritesToNull() {
+        User user = User.createUser("u", "u@test.com", "pw", new Address("KR", "Seoul", "street"));
+
+        user.updateProfile(null, null, null);
+
+        assertThat(user.getAddress()).isNull();
+    }
 }

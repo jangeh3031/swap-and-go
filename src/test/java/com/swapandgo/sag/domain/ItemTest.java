@@ -86,6 +86,10 @@ public class ItemTest {
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusDays(1);
         assertThat(item.addTradeOffer(requester, start, end)).isNotNull();
+
+        assertThatThrownBy(() -> item.addTradeOffer(requester, start, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("대여 기간");
     }
 
     @Test
@@ -152,5 +156,83 @@ public class ItemTest {
         assertThatThrownBy(item::completed)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("이미 완료");
+    }
+
+    @Test
+    void validate_throwsWhenTitleBlank() {
+        User user = User.createUser("u", "u@test.com", "pw", null);
+        Item item = Item.create(
+                user, " ", "c", new BigDecimal("10.00"),
+                null, ItemType.RESALE, TradeType.SELL, Category.전자기기, "Seoul", List.of()
+        );
+
+        assertThatThrownBy(item::validate)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("제목");
+    }
+
+    @Test
+    void validate_throwsWhenContentBlank() {
+        User user = User.createUser("u", "u@test.com", "pw", null);
+        Item item = Item.create(
+                user, "t", " ", new BigDecimal("10.00"),
+                null, ItemType.RESALE, TradeType.SELL, Category.전자기기, "Seoul", List.of()
+        );
+
+        assertThatThrownBy(item::validate)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본문");
+    }
+
+    @Test
+    void validate_throwsWhenPriceZero() {
+        User user = User.createUser("u", "u@test.com", "pw", null);
+        Item item = Item.create(
+                user, "t", "c", BigDecimal.ZERO,
+                null, ItemType.RESALE, TradeType.SELL, Category.전자기기, "Seoul", List.of()
+        );
+
+        assertThatThrownBy(item::validate)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("가격");
+    }
+
+    @Test
+    void validate_throwsWhenPriceNegative() {
+        User user = User.createUser("u", "u@test.com", "pw", null);
+        Item item = Item.create(
+                user, "t", "c", new BigDecimal("-1.00"),
+                null, ItemType.RESALE, TradeType.SELL, Category.전자기기, "Seoul", List.of()
+        );
+
+        assertThatThrownBy(item::validate)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("가격");
+    }
+
+    @Test
+    void validate_rentalRequiresDeposit() {
+        User user = User.createUser("u", "u@test.com", "pw", null);
+        Item item = Item.create(
+                user, "t", "c", new BigDecimal("10.00"),
+                null, ItemType.RENTAL, TradeType.SELL, Category.전자기기, "Seoul", List.of()
+        );
+
+        assertThatThrownBy(item::validate)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("보증금");
+    }
+
+    @Test
+    void validate_rentalRequiresPositiveDeposit() {
+        User user = User.createUser("u", "u@test.com", "pw", null);
+        Item item = Item.create(
+                user, "t", "c", new BigDecimal("10.00"),
+                BigDecimal.ZERO, ItemType.RENTAL, TradeType.SELL, Category.전자기기, "Seoul", List.of()
+        );
+
+        assertThatThrownBy(item::validate)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("보증금");
     }
 }
