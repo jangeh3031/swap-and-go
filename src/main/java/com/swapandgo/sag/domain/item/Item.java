@@ -1,7 +1,7 @@
 package com.swapandgo.sag.domain.item;
 
 import com.swapandgo.sag.domain.Image;
-import com.swapandgo.sag.domain.tradeoffer.TradeOffer;
+import com.swapandgo.sag.domain.request.Request;
 import com.swapandgo.sag.domain.transaction.Transaction;
 import com.swapandgo.sag.domain.user.User;
 import jakarta.persistence.*;
@@ -41,52 +41,43 @@ public class Item {
     private TradeType tradeType;
 
     @Enumerated(EnumType.STRING)
-    private ItemStatus status;
+    private itemStatus status;
 
     @Enumerated(EnumType.STRING)
-    private Category category;
-
-    private String location;
+    private Category categoty;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
     private List<Image> images = new ArrayList<>();
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDateTime created_at;
+    private LocalDateTime updated_at;
 
     //생성 메서드
-    public static Item create(
+    public static Item createPost(
             User user, String title, String content, BigDecimal price,
-            BigDecimal deposit, ItemType type, TradeType tradeType, Category category,
-            String location, List<String> imageUrls
+            BigDecimal deposit, ItemType type, TradeType tradeType, Category categoty,
+            List<Image> images
     ){
-        Item item = new Item();
-        item.setUser(user);
-        item.title = title;
-        item.content = content;
-        item.price = price;
-        item.deposit = deposit;
-        item.type = type;
-        item.tradeType = tradeType;
-        item.category = category;
-        item.status = ItemStatus.ACTIVE;
-        item.location = location;
-        item.createdAt = LocalDateTime.now();
-        item.updatedAt = LocalDateTime.now();
+        Item post = new Item();
+        post.setUser(user);
+        post.title = title;
+        post.content = content;
+        post.price = price;
+        post.deposit = deposit;
+        post.type = type;
+        post.tradeType = tradeType;
+        post.categoty = categoty;
+        post.status = itemStatus.ACTIVE;
+        post.created_at = LocalDateTime.now();
+        post.updated_at = LocalDateTime.now();
 
-        //첫번째 이미지를 썸네일로 설정
-        if(imageUrls != null && !imageUrls.isEmpty()){
-            for (int i = 0; i < imageUrls.size(); i++){
-                Image image = Image.create(imageUrls.get(i));
-                if(i == 0){
-                    image.markAsMain();
-                }
-
-                item.addImage(image);
+        if(images != null){
+            for (Image image : images){
+                post.addImage(image);
             }
         }
-        //item.validate();
-        return item;
+        post.validate();
+        return post;
 
     }
 
@@ -117,52 +108,40 @@ public class Item {
 
     //거래 완료 상태로 바꾸기 (중고 거래 요청 수락 했을 때, 대여 수락 했을 때)
     public void completed(){
-        if(this.status == ItemStatus.COMPLETED || this.status == ItemStatus.RENTED)
-            throw new IllegalStateException("이미 완료된 게시글입니다.");
-        if (this.deposit == null){
-            this.status = ItemStatus.COMPLETED;
-        }else {
-            this.status = ItemStatus.RENTED;
-        }
+        if(this.status == itemStatus.COMPLETED)
+            throw new IllegalStateException("이미 거래 완료된 게시글입니다.");
+        this.status = itemStatus.COMPLETED;
     }
 
     //거래 상태 활성화로 바꾸기 (대여 기간 끝났을때?)
     public void activate(){
-        if(this.status == ItemStatus.ACTIVE)
+        if(this.status == itemStatus.ACTIVE)
             throw new IllegalStateException("이미 활성화된 게시글입니다.");
-        this.status = ItemStatus.ACTIVE;
+        this.status = itemStatus.ACTIVE;
     }
 
     //게시글 수정
     public void update(
             String title, String content, BigDecimal price, BigDecimal deposit,
-            Category category, TradeType tradeType){
+            Category categoty, ItemType type){
         this.title = title;
         this.content = content;
         this.price = price;
         this.deposit = deposit;
-        this.category = category;
-        this.tradeType = tradeType;
-        this.updatedAt = LocalDateTime.now();
+        this.categoty = categoty;
+        this.type = type;
+        this.updated_at = LocalDateTime.now();
 
-        //validate();
+        validate();
     }
 
     //대표 이미지 조회
-    public String getThumbnailUrl(){
-        // 1. isMain이 true인 이미지 찾기
+    public String getMainImageUrl(){
         for (Image image : images){
             if(image.isMain()){
                 return image.getUrl();
             }
         }
-
-        // 2. isMain이 없으면 첫 번째 이미지 반환
-        if(! images.isEmpty()){
-            return images.get(0).getUrl();
-        }
-
-        // 3. 이미지가 아예 없으면 null
         return null;
     }
 
@@ -173,34 +152,34 @@ public class Item {
 
 
     //요청 메서드 -> 요청자와 대여 시작, 끝 기간을 파라미터로 받는다(중고거래일 경우 값 x)
-    public TradeOffer addTradeOffer(User requester, LocalDateTime startAt, LocalDateTime endAt){
+    public Request addRequestForm(User requester, LocalDateTime startAt, LocalDateTime endAt){
         if(requester.equals(this.user)){
             throw new IllegalStateException("본인 글에는 요청을 보낼 수 없습니다.");
         }
 
-        if (this.type == ItemType.RESALE){
+        if (this.type == ItemType.USED){
             startAt = null;
             endAt = null;
         } else if (this.type == ItemType.RENTAL) {
             if(startAt == null || endAt == null){
                 throw new IllegalArgumentException("대여 요청에는 대여 기간이 필요합니다.");
+            }else {
+                throw new IllegalStateException("지원하지 않는 거래 타입입니다.");
             }
-        } else {
-            throw new IllegalStateException("지원하지 않는 거래 타입입니다.");
         }
 
-        TradeOffer tradeOffer = TradeOffer.create(requester, this, startAt, endAt);
+        Request request = Request.create(requester, this, startAt, endAt);
 
         // 양방향 연관관계 동기화
-        requester.getSentTradeOffers().add(tradeOffer);
+        requester.getSentRequests().add(request);
 
-        return tradeOffer;
+        return request;
     }
 
 
 
 
 //    public WishList toggleWish(User user){
-//    } item 에서 찜 리스트를 가지고 있지 않을 거라서 찜 추가 기능은 유저에서 진행
+//    } post 에서 찜 리스트를 가지고 있지 않을 거라서 찜 추가 기능은 유저에서 진행
 
 }

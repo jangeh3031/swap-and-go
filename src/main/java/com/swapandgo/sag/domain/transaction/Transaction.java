@@ -32,12 +32,6 @@ public class Transaction {
     private LocalDateTime startAt;
     private LocalDateTime endAt;
 
-    @Enumerated(EnumType.STRING)
-    private EarlyReturnStatus earlyReturnStatus;
-
-    private LocalDateTime earlyReturnAt;
-    private LocalDateTime earlyReturnRequestedAt;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -51,9 +45,6 @@ public class Transaction {
         transaction.type = type;
         transaction.startAt = startAt;
         transaction.endAt = endAt;
-        transaction.earlyReturnStatus = EarlyReturnStatus.NONE;
-        transaction.createdAt = LocalDateTime.now();
-        transaction.updatedAt = LocalDateTime.now();
 
         return transaction;
     }
@@ -77,72 +68,5 @@ public class Transaction {
             throw new IllegalArgumentException("새로운 반납 시간은 기존 반납 시간보다 늦을 수 없습니다.");
         if (endAt.isEqual(this.endAt))
             throw new IllegalArgumentException("기존 반납 시간과 동일합니다.");
-    }
-
-    // 대여 조기 반납 요청
-    public void requestEarlyReturn(LocalDateTime newEndAt, LocalDateTime now){
-        requireRental();
-        requireActiveRental(now);
-        if (this.earlyReturnStatus == null) {
-            this.earlyReturnStatus = EarlyReturnStatus.NONE;
-        }
-        if (this.earlyReturnStatus == EarlyReturnStatus.PENDING) {
-            throw new IllegalStateException("이미 조기 반납 요청이 진행 중입니다.");
-        }
-        checkEndTime(newEndAt);
-        if (newEndAt.isBefore(now)) {
-            throw new IllegalArgumentException("조기 반납 시간은 현재 시간보다 빠를 수 없습니다.");
-        }
-        this.earlyReturnAt = newEndAt;
-        this.earlyReturnRequestedAt = now;
-        this.earlyReturnStatus = EarlyReturnStatus.PENDING;
-        this.updatedAt = now;
-    }
-
-    public void cancelEarlyReturn(LocalDateTime now){
-        if (this.earlyReturnStatus != EarlyReturnStatus.PENDING) {
-            throw new IllegalStateException("진행 중인 조기 반납 요청만 취소할 수 있습니다.");
-        }
-        this.earlyReturnStatus = EarlyReturnStatus.CANCELED;
-        this.updatedAt = now;
-    }
-
-    public void acceptEarlyReturn(LocalDateTime now){
-        if (this.earlyReturnStatus != EarlyReturnStatus.PENDING) {
-            throw new IllegalStateException("진행 중인 조기 반납 요청만 수락할 수 있습니다.");
-        }
-        if (this.earlyReturnAt == null) {
-            throw new IllegalStateException("조기 반납 시간이 없습니다.");
-        }
-        checkEndTime(this.earlyReturnAt);
-        this.endAt = this.earlyReturnAt;
-        this.earlyReturnStatus = EarlyReturnStatus.ACCEPTED;
-        this.updatedAt = now;
-    }
-
-    public void rejectEarlyReturn(LocalDateTime now){
-        if (this.earlyReturnStatus != EarlyReturnStatus.PENDING) {
-            throw new IllegalStateException("진행 중인 조기 반납 요청만 거절할 수 있습니다.");
-        }
-        this.earlyReturnStatus = EarlyReturnStatus.REJECTED;
-        this.updatedAt = now;
-    }
-
-    private void requireRental() {
-        if (this.type != ItemType.RENTAL) {
-            throw new IllegalStateException("대여 거래만 조기 반납 요청이 가능합니다.");
-        }
-    }
-
-    private void requireActiveRental(LocalDateTime now) {
-        if (this.startAt == null || this.endAt == null) {
-            throw new IllegalStateException("대여 기간이 설정되지 않았습니다.");
-        }
-        if (now.isBefore(this.startAt)) {
-            throw new IllegalStateException("대여 시작 전에는 조기 반납 요청이 불가합니다.");
-        }
-        if (now.isAfter(this.endAt)) {
-            throw new IllegalStateException("이미 종료된 대여입니다.");
-        }
     }
 }
