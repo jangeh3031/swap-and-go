@@ -4,8 +4,10 @@ import com.swapandgo.sag.domain.item.Item;
 import com.swapandgo.sag.domain.transaction.EarlyReturnStatus;
 import com.swapandgo.sag.domain.transaction.Transaction;
 import com.swapandgo.sag.dto.transaction.EarlyReturnRequest;
+import com.swapandgo.sag.dto.transaction.TransactionResponse;
 import com.swapandgo.sag.repository.TransactionRepository;
 import com.swapandgo.sag.repository.UserRepository;
+import com.swapandgo.sag.repository.WishListRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +24,7 @@ import java.util.List;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final WishListRepository wishListRepository;
 
     public Transaction requestEarlyReturn(Long requesterId, Long transactionId, EarlyReturnRequest request) {
         Transaction transaction = findTransaction(transactionId);
@@ -86,8 +91,37 @@ public class TransactionService {
         return transactionRepository.findAllByItemUserIdOrderByIdDesc(sellerId);
     }
 
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> listBuyerTransactionResponses(Long buyerId) {
+        List<Transaction> transactions = listBuyerTransactions(buyerId);
+        Set<Long> likedItemIds = findLikedItemIds(buyerId, transactions);
+        return transactions.stream()
+                .map(t -> new TransactionResponse(t, likedItemIds.contains(t.getItem().getId())))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> listSellerTransactionResponses(Long sellerId) {
+        List<Transaction> transactions = listSellerTransactions(sellerId);
+        Set<Long> likedItemIds = findLikedItemIds(sellerId, transactions);
+        return transactions.stream()
+                .map(t -> new TransactionResponse(t, likedItemIds.contains(t.getItem().getId())))
+                .collect(Collectors.toList());
+    }
+
     private Transaction findTransaction(Long transactionId) {
         return transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
+    }
+
+    private Set<Long> findLikedItemIds(Long userId, List<Transaction> transactions) {
+        List<Long> itemIds = transactions.stream()
+                .map(t -> t.getItem().getId())
+                .distinct()
+                .collect(Collectors.toList());
+        if (itemIds.isEmpty()) {
+            return Set.of();
+        }
+        return wishListRepository.findLikedItemIdsByUserId(userId, itemIds);
     }
 }

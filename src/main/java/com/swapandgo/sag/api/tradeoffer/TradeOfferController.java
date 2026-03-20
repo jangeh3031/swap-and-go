@@ -1,5 +1,6 @@
 package com.swapandgo.sag.api.tradeoffer;
 
+import com.swapandgo.sag.domain.item.ItemType;
 import com.swapandgo.sag.domain.tradeoffer.TradeOfferStatus;
 import com.swapandgo.sag.dto.tradeoffer.TradeOfferCreateRequest;
 import com.swapandgo.sag.dto.tradeoffer.TradeOfferResponse;
@@ -27,13 +28,24 @@ import java.util.stream.Collectors;
 public class TradeOfferController {
     private final TradeOfferService tradeOfferService;
 
-    @PostMapping("/api/tradeoffers")
-    public ResponseEntity<TradeOfferResponse> createTradeOffer(
+    @PostMapping("/api/tradeoffers/resale")
+    public ResponseEntity<TradeOfferResponse> createResaleTradeOffer(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid TradeOfferCreateRequest request) {
         Long userId = userDetails.getUserId();
         TradeOfferResponse response = new TradeOfferResponse(
-                tradeOfferService.createOffer(userId, request)
+                tradeOfferService.createOffer(userId, request, ItemType.RESALE)
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/tradeoffers/rental")
+    public ResponseEntity<TradeOfferResponse> createRentalTradeOffer(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid TradeOfferCreateRequest request) {
+        Long userId = userDetails.getUserId();
+        TradeOfferResponse response = new TradeOfferResponse(
+                tradeOfferService.createOffer(userId, request, ItemType.RENTAL)
         );
         return ResponseEntity.ok(response);
     }

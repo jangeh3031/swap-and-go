@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,9 +52,7 @@ public class TransactionController {
     public ResponseEntity<List<TransactionResponse>> getBuyerTransactions(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
-        List<TransactionResponse> responses = transactionService.listBuyerTransactions(userId).stream()
-                .map(TransactionResponse::new)
-                .collect(Collectors.toList());
+        List<TransactionResponse> responses = transactionService.listBuyerTransactionResponses(userId);
         return ResponseEntity.ok(responses);
     }
 
@@ -63,9 +60,7 @@ public class TransactionController {
     public ResponseEntity<List<TransactionResponse>> getSellerTransactions(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
-        List<TransactionResponse> responses = transactionService.listSellerTransactions(userId).stream()
-                .map(TransactionResponse::new)
-                .collect(Collectors.toList());
+        List<TransactionResponse> responses = transactionService.listSellerTransactionResponses(userId);
         return ResponseEntity.ok(responses);
     }
 }

@@ -4,7 +4,6 @@ import com.swapandgo.sag.domain.item.Item;
 import com.swapandgo.sag.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,6 +33,18 @@ public class ChatRoom {
 
     private LocalDateTime createdAt;
 
+    public static ChatRoom create(Item item, User buyer, User seller) {
+        if (item == null || buyer == null || seller == null) {
+            throw new IllegalArgumentException("item/buyer/seller는 필수입니다.");
+        }
+        ChatRoom room = new ChatRoom();
+        room.item = item;
+        room.buyer = buyer;
+        room.seller = seller;
+        room.createdAt = LocalDateTime.now();
+        return room;
+    }
+
     public void addMessage(ChatMessage m) {
         if (!messages.contains(m)) {
             messages.add(m);
@@ -42,8 +53,11 @@ public class ChatRoom {
     }
 
     public boolean isParticipant(User user) {
-        return user != null && (user.equals(seller) || user.equals(buyer));
+        if (user == null) return false;
+        Long userId = user.getId();
+        return userId != null
+                && ((seller != null && userId.equals(seller.getId()))
+                || (buyer != null && userId.equals(buyer.getId())));
     }
-
 
 }

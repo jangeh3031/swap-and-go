@@ -36,11 +36,16 @@ public class ChatMessage {
 
     //생성 메서드
     public static ChatMessage text(ChatRoom room, User sender, String content) {
+        return create(room, sender, content, null);
+    }
+
+    public static ChatMessage create(ChatRoom room, User sender, String content, String url) {
         ChatMessage m = new ChatMessage();
         m.sender = sender;
         m.content = content;
+        m.url = url;
         m.createdAt = LocalDateTime.now();
-        room.addMessage(m); // ★ 여기서 연관관계 세팅 + 컬렉션 추가
+        room.addMessage(m);
         m.validateSendable();
         return m;
     }

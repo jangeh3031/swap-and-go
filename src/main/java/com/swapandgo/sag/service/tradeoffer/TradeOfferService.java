@@ -29,11 +29,15 @@ public class TradeOfferService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
 
-    public TradeOffer createOffer(Long requesterId, TradeOfferCreateRequest request) {
+    public TradeOffer createOffer(Long requesterId, TradeOfferCreateRequest request, ItemType expectedType) {
         User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + requesterId));
         Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(() -> new EntityNotFoundException("Item not found: " + request.getItemId()));
+
+        if (expectedType != null && item.getType() != expectedType) {
+            throw new IllegalArgumentException("요청 타입이 아이템 타입과 일치하지 않습니다.");
+        }
 
         if (item.getStatus() != ItemStatus.ACTIVE) {
             throw new IllegalStateException("비활성화된 게시글에는 요청을 보낼 수 없습니다.");

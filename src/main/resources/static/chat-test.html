@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat WS Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .row { margin-bottom: 10px; }
+    input, button { padding: 6px 8px; }
+    #log { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; height: 240px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>Chat WebSocket Test</h1>
+
+  <div class="row">
+    <label>Access Token</label>
+    <input id="token" style="width: 70%" placeholder="Bearer 없이 토큰만" />
+  </div>
+  <div class="row">
+    <label>Room ID</label>
+    <input id="roomId" value="10" />
+  </div>
+  <div class="row">
+    <button id="connectBtn">Connect</button>
+    <button id="subscribeBtn">Subscribe</button>
+    <button id="disconnectBtn">Disconnect</button>
+  </div>
+  <div class="row">
+    <input id="message" style="width: 70%" placeholder="message" />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <h3>Log</h3>
+  <div id="log"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+  <script>
+    let client = null;
+    let subscription = null;
+
+    const logEl = document.getElementById('log');
+    const tokenEl = document.getElementById('token');
+    const roomIdEl = document.getElementById('roomId');
+    const messageEl = document.getElementById('message');
+
+    function log(msg) {
+      const now = new Date().toISOString();
+      logEl.textContent += `[${now}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    document.getElementById('connectBtn').onclick = () => {
+      if (client && client.connected) {
+        log('Already connected');
+        return;
+      }
+      const sock = new SockJS('http://localhost:8080/ws/chat-sockjs');
+      const StompLib = window.StompJs || window.Stomp;
+      if (!StompLib) {
+        log('Stomp library not loaded');
+        return;
+      }
+      client = new StompLib.Client({
+        webSocketFactory: () => sock,
+        reconnectDelay: 0,
+        connectHeaders: {
+          Authorization: 'Bearer ' + tokenEl.value.trim()
+        },
+        onConnect: () => {
+          log('Connected');
+        },
+        onStompError: (frame) => {
+          log('STOMP error: ' + frame.headers['message']);
+        },
+        onWebSocketError: (err) => {
+          log('WS error: ' + err);
+        },
+        debug: (str) => {
+          // log(str);
+        }
+      });
+      client.activate();
+      log('Connecting...');
+    };
+
+    document.getElementById('subscribeBtn').onclick = () => {
+      if (!client || !client.connected) {
+        log('Not connected');
+        return;
+      }
+      const roomId = roomIdEl.value.trim();
+      if (!roomId) {
+        log('Room ID required');
+        return;
+      }
+      if (subscription) {
+        subscription.unsubscribe();
+        subscription = null;
+      }
+      const dest = `/sub/chat/rooms/${roomId}`;
+      subscription = client.subscribe(dest, (message) => {
+        log('Received: ' + message.body);
+      });
+      log('Subscribed to ' + dest);
+    };
+
+    document.getElementById('sendBtn').onclick = () => {
+      if (!client || !client.connected) {
+        log('Not connected');
+        return;
+      }
+      const roomId = roomIdEl.value.trim();
+      const content = messageEl.value;
+      if (!roomId || !content) {
+        log('Room ID and message required');
+        return;
+      }
+      client.publish({
+        destination: '/pub/chat/send',
+        body: JSON.stringify({ roomId: Number(roomId), content })
+      });
+      log('Sent: ' + content);
+      messageEl.value = '';
+    };
+
+    document.getElementById('disconnectBtn').onclick = () => {
+      if (subscription) {
+        subscription.unsubscribe();
+        subscription = null;
+      }
+      if (client) {
+        client.deactivate();
+        client = null;
+        log('Disconnected');
+      }
+    };
+  </script>
+</body>
+</html>

@@ -16,6 +16,7 @@ public class WebConfig {
                 registry.addMapping("/**")
                         .allowedOriginPatterns(
                                 "http://localhost:3000",
+                                "http://localhost:8000",
                                 "https://*.ngrok.app",
                                 "https://swap-go-git-develop-diwonis-projects.vercel.app"
                         )
