@@ -20,4 +20,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findAllByBuyerIdOrderByIdDesc(Long buyerId);
 
     List<Transaction> findAllByItemUserIdOrderByIdDesc(Long sellerId);
+
+    @Query("SELECT COUNT(t) > 0 FROM Transaction t " +
+            "WHERE t.type = com.swapandgo.sag.domain.item.ItemType.RENTAL " +
+            "AND t.startAt <= :now AND t.endAt >= :now " +
+            "AND (t.buyer.id = :userId OR t.item.user.id = :userId)")
+    boolean existsActiveRentalForUser(@Param("userId") Long userId, @Param("now") LocalDateTime now);
 }

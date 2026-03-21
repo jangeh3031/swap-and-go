@@ -3,6 +3,7 @@ package com.swapandgo.sag.service.wishList;
 import com.swapandgo.sag.domain.WishList;
 import com.swapandgo.sag.domain.item.Item;
 import com.swapandgo.sag.domain.user.User;
+import com.swapandgo.sag.dto.wishList.WishListItemResponse;
 import com.swapandgo.sag.dto.wishList.WishListResponse;
 import com.swapandgo.sag.repository.ItemRepository;
 import com.swapandgo.sag.repository.UserRepository;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,13 @@ public class WishListService {
         }
 
         return new WishListResponse(itemId, isLiked);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WishListItemResponse> listMyWishList(Long userId) {
+        return wishListRepository.findAllByUserIdOrderByIdDesc(userId).stream()
+                .map(WishListItemResponse::new)
+                .collect(Collectors.toList());
     }
 
 }
