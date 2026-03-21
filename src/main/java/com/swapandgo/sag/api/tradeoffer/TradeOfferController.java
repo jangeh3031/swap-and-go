@@ -4,6 +4,7 @@ import com.swapandgo.sag.domain.item.ItemType;
 import com.swapandgo.sag.domain.tradeoffer.TradeOfferStatus;
 import com.swapandgo.sag.dto.tradeoffer.TradeOfferCreateRequest;
 import com.swapandgo.sag.dto.tradeoffer.TradeOfferResponse;
+import com.swapandgo.sag.dto.tradeoffer.TradeOfferSimpleResponse;
 import com.swapandgo.sag.dto.tradeoffer.TradeOfferStatusUpdateRequest;
 import com.swapandgo.sag.security.user.CustomUserDetails;
 import com.swapandgo.sag.service.tradeoffer.TradeOfferAcceptResult;
@@ -29,47 +30,49 @@ public class TradeOfferController {
     private final TradeOfferService tradeOfferService;
 
     @PostMapping("/api/tradeoffers/resale")
-    public ResponseEntity<TradeOfferResponse> createResaleTradeOffer(
+    public ResponseEntity<TradeOfferSimpleResponse> createResaleTradeOffer(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid TradeOfferCreateRequest request) {
         Long userId = userDetails.getUserId();
-        TradeOfferResponse response = new TradeOfferResponse(
+        TradeOfferSimpleResponse response = new TradeOfferSimpleResponse(
                 tradeOfferService.createOffer(userId, request, ItemType.RESALE)
         );
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/api/tradeoffers/rental")
-    public ResponseEntity<TradeOfferResponse> createRentalTradeOffer(
+    public ResponseEntity<TradeOfferSimpleResponse> createRentalTradeOffer(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid TradeOfferCreateRequest request) {
         Long userId = userDetails.getUserId();
-        TradeOfferResponse response = new TradeOfferResponse(
+        TradeOfferSimpleResponse response = new TradeOfferSimpleResponse(
                 tradeOfferService.createOffer(userId, request, ItemType.RENTAL)
         );
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/api/tradeoffers/{tradeOfferId}")
-    public ResponseEntity<TradeOfferResponse> updateTradeOfferStatus(
+    public ResponseEntity<TradeOfferSimpleResponse> updateTradeOfferStatus(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long tradeOfferId,
             @RequestBody @Valid TradeOfferStatusUpdateRequest request) {
         Long userId = userDetails.getUserId();
         TradeOfferStatus status = request.getStatus();
         if (status == TradeOfferStatus.CANCELED) {
-            TradeOfferResponse response = new TradeOfferResponse(
+            TradeOfferSimpleResponse response = new TradeOfferSimpleResponse(
                     tradeOfferService.cancelOffer(userId, tradeOfferId)
             );
             return ResponseEntity.ok(response);
         }
         if (status == TradeOfferStatus.ACCEPTED) {
             TradeOfferAcceptResult result = tradeOfferService.acceptOffer(userId, tradeOfferId);
-            TradeOfferResponse response = new TradeOfferResponse(result.getTradeOffer(), result.getTransactionId());
+            TradeOfferSimpleResponse response = new TradeOfferSimpleResponse(
+                    result.getTradeOffer(), result.getTransactionId()
+            );
             return ResponseEntity.ok(response);
         }
         if (status == TradeOfferStatus.REJECTED) {
-            TradeOfferResponse response = new TradeOfferResponse(
+            TradeOfferSimpleResponse response = new TradeOfferSimpleResponse(
                     tradeOfferService.rejectOffer(userId, tradeOfferId)
             );
             return ResponseEntity.ok(response);

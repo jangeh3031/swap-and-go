@@ -25,6 +25,7 @@ public class TransactionResponse {
     private final ItemStatus itemStatus;
     private final LocalDateTime startAt;
     private final LocalDateTime endAt;
+    private final LocalDateTime newEndAt;
     private final EarlyReturnStatus earlyReturnStatus;
     private final LocalDateTime createdAt;
 
@@ -44,6 +45,7 @@ public class TransactionResponse {
         this.itemStatus = transaction.getItem().getStatus();
         this.startAt = transaction.getStartAt();
         this.endAt = transaction.getEndAt();
+        this.newEndAt = transaction.getEarlyReturnAt();
         this.earlyReturnStatus = transaction.getEarlyReturnStatus();
         this.createdAt = transaction.getCreatedAt();
     }
@@ -64,6 +66,7 @@ public class TransactionResponse {
         this.itemStatus = transaction.getItem().getStatus();
         this.startAt = transaction.getStartAt();
         this.endAt = transaction.getEndAt();
+        this.newEndAt = transaction.getEarlyReturnAt();
         this.earlyReturnStatus = transaction.getEarlyReturnStatus();
         this.createdAt = transaction.getCreatedAt();
     }

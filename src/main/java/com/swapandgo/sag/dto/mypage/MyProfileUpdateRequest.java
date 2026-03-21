@@ -9,12 +9,7 @@ public class MyProfileUpdateRequest {
     private String username;
     private String password;
 
-    private String fullAddress;
-    private Double latitude;
-    private Double longitude;
     private String country;
     private String region;
-    private String district;
     private String street;
-    private String zipcode;
 }

@@ -76,36 +76,21 @@ public class MyPageService {
     }
 
     private Address mergeAddress(Address current, MyProfileUpdateRequest request) {
-        boolean hasAny = request.getFullAddress() != null
-                || request.getLatitude() != null
-                || request.getLongitude() != null
-                || request.getCountry() != null
+        boolean hasAny = request.getCountry() != null
                 || request.getRegion() != null
-                || request.getDistrict() != null
-                || request.getStreet() != null
-                || request.getZipcode() != null;
+                || request.getStreet() != null;
 
         if (!hasAny && current == null) {
             return null;
         }
 
-        String fullAddress = request.getFullAddress() != null ? request.getFullAddress()
-                : current != null ? current.getFullAddress() : null;
-        Double latitude = request.getLatitude() != null ? request.getLatitude()
-                : current != null ? current.getLatitude() : null;
-        Double longitude = request.getLongitude() != null ? request.getLongitude()
-                : current != null ? current.getLongitude() : null;
         String country = request.getCountry() != null ? request.getCountry()
                 : current != null ? current.getCountry() : null;
         String region = request.getRegion() != null ? request.getRegion()
                 : current != null ? current.getRegion() : null;
-        String district = request.getDistrict() != null ? request.getDistrict()
-                : current != null ? current.getDistrict() : null;
         String street = request.getStreet() != null ? request.getStreet()
                 : current != null ? current.getStreet() : null;
-        String zipcode = request.getZipcode() != null ? request.getZipcode()
-                : current != null ? current.getZipcode() : null;
 
-        return new Address(fullAddress, latitude, longitude, country, region, district, street, zipcode);
+        return new Address(country, region, street);
     }
 }

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
         "requesterId",
         "status",
         "requestedAt",
-        "earlyReturnAt",
+        "newEndAt",
         "currentEndAt"
 })
 public class EarlyReturnResponse {
@@ -23,7 +23,7 @@ public class EarlyReturnResponse {
     private final Long requesterId;
     private final EarlyReturnStatus status;
     private final LocalDateTime requestedAt;
-    private final LocalDateTime earlyReturnAt;
+    private final LocalDateTime newEndAt;
     private final LocalDateTime currentEndAt;
 
     public EarlyReturnResponse(Transaction transaction) {
@@ -32,7 +32,7 @@ public class EarlyReturnResponse {
         this.requesterId = transaction.getBuyer().getId();
         this.status = transaction.getEarlyReturnStatus();
         this.requestedAt = transaction.getEarlyReturnRequestedAt();
-        this.earlyReturnAt = transaction.getEarlyReturnAt();
+        this.newEndAt = transaction.getEarlyReturnAt();
         this.currentEndAt = transaction.getEndAt();
     }
 }

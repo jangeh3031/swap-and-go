@@ -14,6 +14,14 @@ public class MyProfileResponse {
         this.userId = user.getId();
         this.email = user.getEmail();
         this.username = user.getUsername();
-        this.address = new MyAddressResponse(user.getAddress());
+        if (user.getAddress() == null) {
+            this.address = new MyAddressResponse(null, null, null);
+        } else {
+            this.address = new MyAddressResponse(
+                    user.getAddress().getCountry(),
+                    user.getAddress().getRegion(),
+                    user.getAddress().getStreet()
+            );
+        }
     }
 }
